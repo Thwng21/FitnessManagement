@@ -37,7 +37,7 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 bg-black overflow-hidden">
       {/* Background Image with Overlay */}
-      <div 
+      <div
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat scale-105 animate-pulse-slow"
         style={{ backgroundImage: "url('/images/gym-bg.png')" }}
       />
@@ -50,8 +50,8 @@ export default function LoginPage() {
       <div className="relative z-20 max-w-md w-full">
         {/* Logo Section */}
         <div className="text-center mb-8">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500 to-teal-600 shadow-2xl shadow-emerald-500/20 mb-4 animate-bounce-subtle">
-            <Dumbbell className="h-8 w-8 text-white" strokeWidth={2.5} />
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-white to-teal-600 shadow-2xl shadow-emerald-500/20 mb-4 animate-bounce-subtle">
+            <img src="/images/logoicon.png" alt="" />
           </div>
           <h1 className="text-4xl font-black text-white tracking-tighter mb-2">
             GWOUTH<span className="text-emerald-500 text-outline-emerald">FIT</span>
@@ -62,14 +62,14 @@ export default function LoginPage() {
         {/* Form Card */}
         <div className="bg-white/5 backdrop-blur-2xl border border-white/10 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          
+
           <form className="space-y-6 relative z-10" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm p-4 rounded-2xl text-center font-bold animate-shake">
                 {error}
               </div>
             )}
-            
+
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Tài khoản Email</label>
@@ -91,7 +91,13 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center ml-1">
                   <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Mật khẩu</label>
-                  <Link href="/auth/reset" className="text-xs font-bold text-emerald-500 hover:text-emerald-400">Quên mật khẩu?</Link>
+                  <Link
+                    href="/auth/reset"
+                    tabIndex={-1}
+                    className="text-xs font-bold text-emerald-500 hover:text-emerald-400"
+                  >
+                    Quên mật khẩu?
+                  </Link>
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500">
@@ -138,10 +144,10 @@ export default function LoginPage() {
 
         {/* Footer info */}
         <p className="mt-8 text-center text-xs text-gray-600 font-bold uppercase tracking-[0.2em]">
-          Powered by GwouthFit AI • Premium Training Suite
+          Powered by GwouthFit • Premium Training Suite
         </p>
       </div>
-      
+
       <style jsx global>{`
         @keyframes bounce-subtle {
           0%, 100% { transform: translateY(0); }

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { X, RefreshCcw, Timer, Zap, Image as ImageIcon, Trash2 } from "lucide-react";
+import { X, RefreshCcw, Timer, Zap, Image as ImageIcon, Trash2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import api from "@/lib/api";
 
 export interface CapturedPhoto {
   src: string;
@@ -25,6 +26,7 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
   const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
   const [capturedImages, setCapturedImages] = useState<CapturedPhoto[]>([]);
   const [selectedPreview, setSelectedPreview] = useState<number | null>(null);
+  const [userWeight, setUserWeight] = useState<string | null>(null);
 
   // Touch Swipe State
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -104,7 +106,17 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
   useEffect(() => {
     if (isOpen) {
       startCamera();
+      
+      const today = new Date();
+      const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      api.get(`/health/${todayKey}`).then(res => {
+        if (res.data && res.data.weight) {
+          setUserWeight(res.data.weight.toString());
+        }
+      }).catch(err => console.error(err));
+      
     } else {
+      setUserWeight(null);
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
         setStream(null);
@@ -143,6 +155,21 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
         
         // Khôi phục hệ tọa độ
         ctx.setTransform(1, 0, 0, 1, 0, 0);
+        
+        if (userWeight) {
+          ctx.font = "bold 80px sans-serif";
+          ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+          ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+          ctx.lineWidth = 6;
+          ctx.textAlign = "left";
+          
+          const text = `${userWeight} kg`;
+          const x = 40;
+          const y = canvas.height - 40;
+          
+          ctx.strokeText(text, x, y);
+          ctx.fillText(text, x, y);
+        }
         
         setFlash(true);
         setTimeout(() => setFlash(false), 200);
@@ -250,6 +277,11 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
             muted 
             className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-full object-cover transition-transform duration-300 ${facingMode === "user" ? "scale-x-[-1]" : ""}`} 
           />
+          {userWeight && (
+            <div className="absolute bottom-4 left-4 z-10 text-white/60 font-bold text-3xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] pointer-events-none">
+              {userWeight} kg
+            </div>
+          )}
         </div>
         <canvas ref={canvasRef} className="hidden" />
       </div>
@@ -298,8 +330,9 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
       {selectedPreview !== null && (
         <div className="absolute inset-0 z-110 bg-black flex flex-col md:p-4">
           <div className="flex justify-between items-center p-6 bg-linear-to-b from-black/80 to-transparent absolute top-0 left-0 w-full z-10">
-            <Button variant="ghost" size="icon" onClick={() => setSelectedPreview(null)} className="rounded-full hover:bg-neutral-800 text-white">
-              <X className="w-6 h-6" />
+            <Button variant="outline" onClick={() => setSelectedPreview(null)} className="rounded-full border-white/20 bg-black/50 hover:bg-white hover:text-black text-white px-5 transition-all">
+              <Check className="w-5 h-5 mr-1" />
+              Xong
             </Button>
             <div className="font-semibold text-white/70 tracking-widest px-4 py-1.5 bg-neutral-900/50 rounded-full backdrop-blur-md">
                {selectedPreview + 1} / {capturedImages.length}

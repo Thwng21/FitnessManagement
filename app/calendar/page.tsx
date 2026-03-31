@@ -88,35 +88,41 @@ export default function CalendarPage() {
 
   // Fetch dữ liệu từ BE
   const fetchWorkouts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data: WorkoutData[] = await api.get("/workouts");
-      const workoutMap: Record<string, WorkoutData> = {};
-      data.forEach((w) => {
-        // Chuẩn hóa ngày (đảm bảo đồng nhất với "yyyy-MM-dd")
-        try {
-          const dateKey = format(parseISO(w.date), "yyyy-MM-dd");
-          workoutMap[dateKey] = w;
-        } catch (e) {
-          console.error("Invalid date from BE:", w.date);
-          workoutMap[w.date] = w;
-        }
-      });
-      setWorkouts(workoutMap);
-    } catch (err) {
-      console.error("Failed to fetch workouts:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  setLoading(true);
+  try {
+    const response = await api.get("/workouts");
+    const data: WorkoutData[] = response.data;
+
+    const workoutMap: Record<string, WorkoutData> = {};
+    data.forEach((w) => {
+      try {
+        const dateKey = format(parseISO(w.date), "yyyy-MM-dd");
+        workoutMap[dateKey] = w;
+      } catch (e) {
+        workoutMap[w.date] = w;
+      }
+    });
+
+    setWorkouts(workoutMap);
+  } catch (err: any) {
+    // Chỉ ghi log nhẹ ở trình duyệt, không văng pop-up đỏ
+    console.log("⚠️ Backend hiện không phản hồi (Network Error) hoặc chưa chạy. Hãy kiểm tra lại cổng Backend.");
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   const fetchTemplates = async () => {
     setLoadingTemplates(true);
     try {
-      const response = await api.get("/workouts/calendar");
+      const response = await api.get("/workouts/templates");
       setTemplates(response.data || []);
-    } catch (err) {
-      console.error("Failed to fetch templates:", err);
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        setTemplates([]);
+      } else {
+        console.log("⚠️ Lỗi không lấy được bài tập mẫu (Backend có thể chưa chạy).");
+      }
     } finally {
       setLoadingTemplates(false);
     }
@@ -470,20 +476,20 @@ export default function CalendarPage() {
                   </div>
 
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-bold flex items-center gap-2 text-xl"><Dumbbell className="w-6 h-6 text-primary" /> Danh sách bài tập</h3>
-                      <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <h3 className="font-bold flex items-center gap-2 text-lg sm:text-xl"><Dumbbell className="w-5 h-5 sm:w-6 sm:h-6 text-primary" /> Danh sách bài tập</h3>
+                      <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
                         <Button 
                           type="button"
                           variant="outline"
-                          size="lg" 
+                          size="sm" 
                           onClick={() => { fetchTemplates(); setIsLibraryModalOpen(true); }}
-                          className="gap-2 border-primary/30 text-primary hover:bg-primary/5"
+                          className="flex-1 sm:flex-none gap-2 border-primary/30 text-primary hover:bg-primary/5 h-10 sm:h-11"
                         >
-                          <Library className="w-5 h-5" /> Chọn từ Thư viện
+                          <Library className="w-4 h-4 sm:w-5 sm:h-5" /> <span className="text-xs sm:text-sm">Từ Thư viện</span>
                         </Button>
-                        <Button size="lg" onClick={addDraftExercise} className="gap-2 bg-primary">
-                          <Plus className="w-5 h-5" /> Thêm bài tập
+                        <Button size="sm" onClick={addDraftExercise} className="flex-1 sm:flex-none gap-2 bg-primary h-10 sm:h-11">
+                          <Plus className="w-4 h-4 sm:w-5 sm:h-5" /> <span className="text-xs sm:text-sm">Thêm bài tập</span>
                         </Button>
                       </div>
                     </div>

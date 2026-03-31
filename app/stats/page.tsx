@@ -50,9 +50,9 @@ export default function StatsPage() {
             setLoading(true);
             try {
                 const [healthRes, workoutRes, photoRes] = await Promise.all([
-                    api.get("/health/history"),
-                    api.get("/workouts/history"),
-                    api.get("/photos/history")
+                    api.get("/health"),
+                    api.get("/workouts"),
+                    api.get("/photos")
                 ]);
                 setHealthData(Array.isArray(healthRes.data) ? healthRes.data : []);
                 setWorkoutsData(Array.isArray(workoutRes.data) ? workoutRes.data : []);

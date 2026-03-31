@@ -84,8 +84,12 @@ export default function WorkoutLibraryPage() {
     try {
       const response = await api.get("/workouts/templates");
       setTemplates(response.data || []);
-    } catch (err) {
-      toast.error("Không thể tải danh sách bài tập");
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        setTemplates([]);
+      } else {
+        toast.error("Không thể tải danh sách bài tập. Vui lòng thử lại sau.");
+      }
     } finally {
       setLoading(false);
     }
@@ -214,14 +218,14 @@ export default function WorkoutLibraryPage() {
       <main className="container mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-500 max-w-5xl">
         
         {/* ─── HEADER ─── */}
-        <div className="flex justify-between items-center bg-secondary/30 p-6 rounded-[2rem] border border-border/40 backdrop-blur-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-secondary/30 p-6 rounded-[2rem] border border-border/40 backdrop-blur-sm">
            <div>
-              <h1 className="text-3xl font-black tracking-tight">Thư viện Bài tập</h1>
-              <p className="text-muted-foreground">Xây dựng và quản lý các giáo án tập luyện của bạn</p>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Thư viện Bài tập</h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">Xây dựng và quản lý các giáo án tập luyện của bạn</p>
            </div>
            <Button 
              onClick={() => { setEditingTemplate({ title: "", exercises: [] }); setIsSectionModalOpen(true); }}
-             className="rounded-2xl h-12 px-6 font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+             className="w-full sm:w-auto rounded-2xl h-12 px-6 font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
            >
              <Plus className="w-5 h-5 mr-2" /> Tạo Buổi tập
            </Button>
@@ -239,28 +243,28 @@ export default function WorkoutLibraryPage() {
              templates.map((template) => (
                <Card key={template.id} className="overflow-hidden border-border/60 rounded-[2rem] hover:border-primary/40 transition-colors shadow-sm">
                  <div 
-                   className="p-6 flex items-center justify-between cursor-pointer hover:bg-secondary/20 transition-colors"
+                   className="p-4 sm:p-6 flex flex-wrap items-center justify-between gap-4 cursor-pointer hover:bg-secondary/20 transition-colors"
                    onClick={() => setExpandedId(expandedId === template.id ? null : template.id)}
                  >
-                    <div className="flex items-center gap-4">
-                       <div className="bg-primary/10 p-3 rounded-2xl">
-                          <PlusCircle className="w-6 h-6 text-primary" />
+                    <div className="flex items-center gap-3 sm:gap-4 flex-1">
+                       <div className="bg-primary/10 p-2 sm:p-3 rounded-2xl flex-shrink-0">
+                          <PlusCircle className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                        </div>
                        <div>
-                          <h3 className="text-xl font-bold">{template.title}</h3>
-                          <p className="text-sm text-muted-foreground">{template.exercises.length} bài tập đã thêm</p>
+                          <h3 className="text-lg sm:text-xl font-bold line-clamp-1">{template.title}</h3>
+                          <p className="text-xs sm:text-sm text-muted-foreground">{template.exercises.length} bài tập đã thêm</p>
                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2">
                        <Button 
-                         variant="ghost" size="icon" className="rounded-full"
+                         variant="ghost" size="icon" className="rounded-full w-8 h-8 sm:w-10 sm:h-10"
                          onClick={(e) => { e.stopPropagation(); setEditingTemplate(template); setIsSectionModalOpen(true); }}
                        >
                          <Edit2 className="w-4 h-4" />
                        </Button>
                        <AlertDialog>
                           <AlertDialogTrigger asChild>
-                             <Button variant="ghost" size="icon" className="rounded-full text-destructive" onClick={(e) => e.stopPropagation()}>
+                             <Button variant="ghost" size="icon" className="rounded-full text-destructive w-8 h-8 sm:w-10 sm:h-10" onClick={(e) => e.stopPropagation()}>
                                 <Trash2 className="w-4 h-4" />
                              </Button>
                           </AlertDialogTrigger>
@@ -275,7 +279,7 @@ export default function WorkoutLibraryPage() {
                              </AlertDialogFooter>
                           </AlertDialogContent>
                        </AlertDialog>
-                       {expandedId === template.id ? <ChevronUp className="w-5 h-5 ml-2" /> : <ChevronDown className="w-5 h-5 ml-2" />}
+                       {expandedId === template.id ? <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 ml-1 sm:ml-2" /> : <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 ml-1 sm:ml-2" />}
                     </div>
                  </div>
 
@@ -323,10 +327,10 @@ export default function WorkoutLibraryPage() {
 
                          <button 
                            onClick={() => { setTargetTemplateId(template.id); setIsExerciseModalOpen(true); setCurrentExercise({ name: "", sets: 3, reps: 12, weight: 0, description: "" }); }}
-                           className="border-2 border-dashed border-border/60 p-8 rounded-3xl flex flex-col items-center justify-center text-muted-foreground hover:border-primary/40 hover:text-primary transition-all group"
+                           className="border-2 border-dashed border-border/60 p-6 sm:p-8 rounded-3xl flex flex-col items-center justify-center text-muted-foreground hover:border-primary/40 hover:text-primary transition-all group"
                          >
                             <PlusCircle className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" />
-                            <span className="font-bold uppercase text-xs tracking-widest">Thêm bài tập chi tiết</span>
+                            <span className="font-bold uppercase text-[10px] sm:text-xs tracking-widest text-center">Thêm bài tập chi tiết</span>
                          </button>
                       </div>
                    </div>
@@ -338,7 +342,7 @@ export default function WorkoutLibraryPage() {
 
         {/* ─── MODAL: CREATE/EDIT SECTION ─── */}
         <Dialog open={isSectionModalOpen} onOpenChange={setIsSectionModalOpen}>
-           <DialogContent className="rounded-[2rem] sm:max-w-[425px]">
+           <DialogContent className="rounded-[2rem] sm:max-w-[425px] w-[95vw] sm:w-full">
               <DialogHeader>
                  <DialogTitle>{editingTemplate?.id ? "Sửa buổi tập" : "Tạo buổi tập mới"}</DialogTitle>
                  <DialogDescription>Nhập tiêu đề cho buổi tập mẫu của bạn (ví dụ: Tập ngực, Fullbody...)</DialogDescription>
@@ -363,7 +367,7 @@ export default function WorkoutLibraryPage() {
 
         {/* ─── MODAL: ADD EXERCISE ─── */}
         <Dialog open={isExerciseModalOpen} onOpenChange={setIsExerciseModalOpen}>
-           <DialogContent className="rounded-[2.5rem] sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+           <DialogContent className="rounded-[2rem] sm:rounded-[2.5rem] sm:max-w-[500px] max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
               <DialogHeader>
                  <DialogTitle className="text-2xl font-black">Thêm Bài Tập</DialogTitle>
                  <DialogDescription>Điền thông tin chi tiết bài tập để lưu vào giáo án.</DialogDescription>

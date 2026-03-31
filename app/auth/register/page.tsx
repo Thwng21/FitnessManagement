@@ -56,8 +56,8 @@ export default function RegisterPage() {
       <div className="relative z-20 max-w-lg w-full">
         {/* Logo Section */}
         <div className="text-center mb-8">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500 to-teal-600 shadow-2xl shadow-emerald-500/20 mb-4 animate-bounce-subtle">
-            <Dumbbell className="h-8 w-8 text-white" strokeWidth={2.5} />
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-white to-teal-600 shadow-2xl shadow-emerald-500/20 mb-4 animate-bounce-subtle">
+            <img src="/images/logoicon.png" alt="" />
           </div>
           <h1 className="text-4xl font-black text-white tracking-tighter mb-2">
             GIA NHẬP <span className="text-emerald-500 text-outline-emerald font-black">GWOUTHFIT</span>
@@ -87,7 +87,7 @@ export default function RegisterPage() {
                     type="text"
                     required
                     className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-medium"
-                    placeholder="Nguyễn"
+                    placeholder="Phạm"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                   />
@@ -103,7 +103,7 @@ export default function RegisterPage() {
                     type="text"
                     required
                     className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-medium"
-                    placeholder="Văn An"
+                    placeholder="Thân Thương"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                   />
@@ -121,7 +121,7 @@ export default function RegisterPage() {
                   type="email"
                   required
                   className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-medium"
-                  placeholder="name@example.com"
+                  placeholder="name@gmail.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
@@ -174,7 +174,7 @@ export default function RegisterPage() {
 
         {/* Footer info */}
         <p className="mt-8 text-center text-xs text-gray-600 font-bold uppercase tracking-[0.2em]">
-          Be your better version with GwouthFit AI
+          Be your better version with GwouthFit 
         </p>
       </div>
       

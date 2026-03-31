@@ -45,9 +45,12 @@ const Header = () => {
 
         {/* Logo */}
         <Link href="/" className="group flex items-center gap-2.5 transition-all hover:opacity-80">
-          <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20 dark:shadow-emerald-500/30">
-            <Dumbbell className="h-4 w-4 text-white" strokeWidth={2.5} />
-          </div>
+          <img
+            src="/images/logoicon.png"
+            alt="Logo"
+            className="h-8 w-8 object-contain rounded-xl shadow-lg"
+            
+          />
           <span className="text-xl font-semibold tracking-tight bg-linear-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
             GwouthFit
           </span>
