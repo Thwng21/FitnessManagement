@@ -22,7 +22,7 @@ import { Plus, Camera, Trash2, Image as ImageIcon, X, Download, CheckSquare, Squ
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import api from "@/lib/api";
-import CameraModal from "@/components/CameraModal";
+import CameraModal, { CapturedPhoto } from "@/components/CameraModal";
 import { toast } from "sonner";
 import { Loader2, AlertCircle } from "lucide-react";
 import {
@@ -35,6 +35,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { parseISO } from "date-fns";
 
 interface PhotoData {
@@ -62,6 +72,11 @@ export default function PhotosPage() {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<string[]>([]);
   const [isDeletingMultiple, setIsDeletingMultiple] = useState(false);
+
+  // States cho hộp thoại Photobooth
+  const [isPhotoboothDialogOpen, setIsPhotoboothDialogOpen] = useState(false);
+  const [photoboothConfig, setPhotoboothConfig] = useState<{ photos: PhotoData[]; date: Date } | null>(null);
+  const [photoboothLayout, setPhotoboothLayout] = useState<"1-col" | "2-col">("1-col");
 
   const [allPhotos, setAllPhotos] = useState<PhotoData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -142,11 +157,23 @@ export default function PhotosPage() {
     }
   };
 
-  const generatePhotobooth = async (photosToUse: PhotoData[], dateToUse: Date) => {
+  const openPhotoboothDialog = (photosToUse: PhotoData[], dateToUse: Date) => {
     if (!photosToUse || photosToUse.length === 0) {
       toast.error("Không có ảnh nào để tạo Photobooth.");
       return;
     }
+    setPhotoboothConfig({ photos: photosToUse, date: dateToUse });
+    setIsPhotoboothDialogOpen(true);
+  };
+
+  const generatePhotobooth = async () => {
+    if (!photoboothConfig) return;
+    const { photos: photosToUse, date: dateToUse } = photoboothConfig;
+    if (!photosToUse || photosToUse.length === 0) {
+      toast.error("Không có ảnh nào để tạo Photobooth.");
+      return;
+    }
+    setIsPhotoboothDialogOpen(false);
     const loadingToast = toast.loading("Đang tạo Photobooth, vui lòng đợi...");
     try {
       const canvas = document.createElement("canvas");
@@ -175,11 +202,27 @@ export default function PhotosPage() {
         )
       );
 
-      // Calculatiion
-      const maxDrawWidth = stripWidth - padding * 2;
-      const drawHeights = loadedImages.map((img) => (img.height / img.width) * maxDrawWidth);
-      const totalImagesHeight =
-        drawHeights.reduce((a, b) => a + b, 0) + (drawHeights.length > 1 ? imageMargin * (drawHeights.length - 1) : 0);
+      // Calculation
+      const maxDrawWidth = photoboothLayout === "1-col" 
+        ? stripWidth - padding * 2 
+        : (stripWidth - padding * 2 - imageMargin) / 2;
+
+      let totalImagesHeight = 0;
+      let drawHeights: number[] = [];
+
+      if (photoboothLayout === "1-col") {
+        drawHeights = loadedImages.map((img) => (img.height / img.width) * maxDrawWidth);
+        totalImagesHeight = drawHeights.reduce((a, b) => a + b, 0) + (drawHeights.length > 1 ? imageMargin * (drawHeights.length - 1) : 0);
+      } else {
+        // 2 columns calculate rows height
+        drawHeights = loadedImages.map((img) => (img.height / img.width) * maxDrawWidth);
+        for (let i = 0; i < loadedImages.length; i += 2) {
+          const h1 = drawHeights[i];
+          const h2 = i + 1 < loadedImages.length ? drawHeights[i + 1] : 0;
+          totalImagesHeight += Math.max(h1, h2) + imageMargin;
+        }
+        totalImagesHeight -= imageMargin; // remove last margin
+      }
 
       canvas.width = stripWidth;
       canvas.height = headerSpace + totalImagesHeight + padding + footerSpace;
@@ -200,15 +243,39 @@ export default function PhotosPage() {
 
       // Draw Images
       let currentY = headerSpace;
-      loadedImages.forEach((img, idx) => {
-        const height = drawHeights[idx];
-        
-        ctx.fillStyle = "#222";
-        ctx.fillRect(padding, currentY, maxDrawWidth, height);
-        
-        ctx.drawImage(img, padding, currentY, maxDrawWidth, height);
-        currentY += height + imageMargin;
-      });
+      
+      if (photoboothLayout === "1-col") {
+        loadedImages.forEach((img, idx) => {
+          const height = drawHeights[idx];
+          
+          ctx.fillStyle = "#222";
+          ctx.fillRect(padding, currentY, maxDrawWidth, height);
+          
+          ctx.drawImage(img, padding, currentY, maxDrawWidth, height);
+          currentY += height + imageMargin;
+        });
+      } else {
+        for (let i = 0; i < loadedImages.length; i += 2) {
+          const img1 = loadedImages[i];
+          const img2 = i + 1 < loadedImages.length ? loadedImages[i + 1] : null;
+          const h1 = drawHeights[i];
+          const h2 = img2 ? drawHeights[i + 1] : 0;
+
+          // Left image
+          ctx.fillStyle = "#222";
+          ctx.fillRect(padding, currentY, maxDrawWidth, h1);
+          ctx.drawImage(img1, padding, currentY, maxDrawWidth, h1);
+
+          // Right image if exists
+          if (img2) {
+            ctx.fillStyle = "#222";
+            ctx.fillRect(padding + maxDrawWidth + imageMargin, currentY, maxDrawWidth, h2);
+            ctx.drawImage(img2, padding + maxDrawWidth + imageMargin, currentY, maxDrawWidth, h2);
+          }
+          
+          currentY += Math.max(h1, h2) + imageMargin;
+        }
+      }
 
       // Footer
       ctx.fillStyle = "#555555";
@@ -230,7 +297,7 @@ export default function PhotosPage() {
     }
   };
 
-  const handleCapture = async (images: any[]) => {
+  const handleCapture = async (images: CapturedPhoto[]) => {
     const dateStr = format(selectedDate || TODAY, "yyyy-MM-dd");
     let successCount = 0;
     
@@ -301,7 +368,7 @@ export default function PhotosPage() {
             <Button 
                 onClick={() => {
                    const todayData = getPhotosForDay(TODAY);
-                   generatePhotobooth(todayData, TODAY);
+                   openPhotoboothDialog(todayData, TODAY);
                 }} 
                 variant="secondary"
                 className="gap-2 rounded-full font-bold shadow-md hover:scale-105 transition-transform"
@@ -447,7 +514,7 @@ export default function PhotosPage() {
                   size="sm"
                   title="Tạo ảnh ghép tổng hợp (Photobooth)"
                   className="rounded-full font-semibold border-primary/20 text-primary hover:bg-primary/10 transition-colors"
-                  onClick={() => generatePhotobooth(selectedData, selectedDate)}
+                  onClick={() => openPhotoboothDialog(selectedData, selectedDate)}
                 >
                   <Layers className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">Photobooth</span>
@@ -535,7 +602,7 @@ export default function PhotosPage() {
 
                       {photo.note && (
                         <div className="bg-secondary/40 p-4 rounded-2xl border border-secondary/60">
-                          <p className="text-sm font-medium text-foreground/90">"{photo.note}"</p>
+                          <p className="text-sm font-medium text-foreground/90">&quot;{photo.note}&quot;</p>
                         </div>
                       )}
                     </div>
@@ -607,6 +674,54 @@ export default function PhotosPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={isPhotoboothDialogOpen} onOpenChange={setIsPhotoboothDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Tùy chọn Bố cục Photobooth</DialogTitle>
+            <DialogDescription>
+              Chọn cách sắp xếp ảnh bạn muốn khi xuất file Photobooth.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-6">
+            <RadioGroup value={photoboothLayout} onValueChange={(val) => setPhotoboothLayout(val as "1-col" | "2-col")} className="grid grid-cols-2 gap-4">
+              <div>
+                <RadioGroupItem value="1-col" id="col-1" className="peer sr-only" />
+                <Label
+                  htmlFor="col-1"
+                  className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                >
+                  <div className="w-12 h-16 border rounded bg-background flex flex-col p-1 gap-1 mb-3">
+                    <div className="w-full h-1/2 bg-muted-foreground/20 rounded-sm" />
+                    <div className="w-full h-1/2 bg-muted-foreground/20 rounded-sm" />
+                  </div>
+                  <span className="font-semibold text-sm">1 Cột dọc</span>
+                </Label>
+              </div>
+              <div>
+                <RadioGroupItem value="2-col" id="col-2" className="peer sr-only" />
+                <Label
+                  htmlFor="col-2"
+                  className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                >
+                  <div className="w-16 h-16 border rounded bg-background flex flex-wrap p-1 gap-1 mb-3 content-start">
+                    <div className="w-[calc(50%-2px)] aspect-square bg-muted-foreground/20 rounded-sm" />
+                    <div className="w-[calc(50%-2px)] aspect-square bg-muted-foreground/20 rounded-sm" />
+                    <div className="w-[calc(50%-2px)] aspect-square bg-muted-foreground/20 rounded-sm" />
+                  </div>
+                  <span className="font-semibold text-sm">Lưới 2 cột</span>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPhotoboothDialogOpen(false)}>Hủy</Button>
+            <Button onClick={generatePhotobooth} className="gap-2 font-bold px-6">
+              <Download className="w-4 h-4" /> Xuất ngay
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
