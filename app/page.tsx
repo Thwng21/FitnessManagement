@@ -27,6 +27,7 @@ import CameraModal, { CapturedPhoto } from "@/components/CameraModal";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Exercise {
   id: string;
@@ -54,6 +55,7 @@ interface HealthData {
 }
 
 export default function Home() {
+  const router = useRouter();
   const TODAY_DATE = startOfToday();
   const todayKey = format(TODAY_DATE, "yyyy-MM-dd");
   
@@ -431,6 +433,7 @@ export default function Home() {
 
           if (successCount > 0) {
             toast.success(`Đã lưu ${successCount} ảnh vào Nhật Ký trên Cloud!`);
+            router.push("/photos");
           } else if (images.length > 0) {
             toast.error("Lỗi khi tải ảnh lên máy chủ.");
           }

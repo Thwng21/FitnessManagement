@@ -291,7 +291,7 @@ export default function StatsPage() {
                                     <CardDescription>Biến động cân nặng trong tháng hiện tại</CardDescription>
                                 </CardHeader>
                                 <CardContent className="h-[300px] w-full pt-4">
-                                    <ResponsiveContainer width="100%" height="100%">
+                                    <ResponsiveContainer width="100%" height="100%" minHeight={300} minWidth={0}>
                                         <AreaChart data={weightTrendData}>
                                             <defs>
                                                 <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
@@ -320,7 +320,7 @@ export default function StatsPage() {
                                     <CardDescription>Phân tích 7 ngày gần nhất</CardDescription>
                                 </CardHeader>
                                 <CardContent className="h-[300px] w-full pt-4">
-                                    <ResponsiveContainer width="100%" height="100%">
+                                    <ResponsiveContainer width="100%" height="100%" minHeight={300} minWidth={0}>
                                         <BarChart data={caloriesData}>
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
                                             <XAxis dataKey="name" stroke="var(--muted-foreground)" axisLine={false} tickLine={false} />
@@ -377,7 +377,7 @@ export default function StatsPage() {
                                     <CardDescription>Số buổi tập luyện được ghi nhận trong các tháng gần nhất</CardDescription>
                                 </CardHeader>
                                 <CardContent className="h-[300px] w-full pt-4">
-                                    <ResponsiveContainer width="100%" height="100%">
+                                    <ResponsiveContainer width="100%" height="100%" minHeight={300} minWidth={0}>
                                         <BarChart data={workoutConsistency}>
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.3} />
                                             <XAxis dataKey="name" scale="point" padding={{ left: 10, right: 10 }} stroke="var(--muted-foreground)" axisLine={false} tickLine={false} />

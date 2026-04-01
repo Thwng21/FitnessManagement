@@ -2,6 +2,7 @@ import axios, { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'ax
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001',
+  timeout: 15000, // Timeout sau 15 giây nếu backend không trả lời
 });
 
 api.interceptors.request.use(
