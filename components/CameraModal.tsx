@@ -273,9 +273,13 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
             ref={videoRef} 
             onClick={takePhoto}
             autoPlay 
-            playsInline 
-            muted 
-            className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-full object-cover transition-transform duration-300 ${facingMode === "user" ? "scale-x-[-1]" : ""}`} 
+            playsInline={true}
+            webkit-playsinline="true"
+            controls={false}
+            disablePictureInPicture
+            disableRemotePlayback
+            muted={true}
+            className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-full w-full object-cover transition-transform duration-300 ${facingMode === "user" ? "scale-x-[-1]" : ""}`} 
           />
           {userWeight && (
             <div className="absolute bottom-4 left-4 z-10 text-white/60 font-bold text-3xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] pointer-events-none">
